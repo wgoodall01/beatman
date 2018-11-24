@@ -1,0 +1,39 @@
+Beatman is a web-based manager for beatsaber songs. 
+I wasn't really happy with BeatDrop, and I wanted something that would work over a network.
+
+Install modes:
+	Live as an .exe in the BeatSaber install folder:
+		Use inconshreveable/mousetrap to detect launches from Explorer (or maybe a different build?)
+		Open a webserver on localhost, open a web browser to that port.
+		No auth.
+
+	Live in a Docker container.
+		Mounts /beatsaber: Something approximating the BeatSaber install dir.
+		Opens a port, web UI. Auth with simple tokens, basic auth, or smth. 
+
+
+Backend: 
+	Look at a beatsaber installs dir (basically, CustomSongs and Playlists)
+	HTTP request for song audio. /api/audio/xxxxx-xxxxx -> <whatever path it actually is>
+	HTTP request for song cover. /api/cover/xxxxx-xxxxx -> <whatever the cover is>
+	HTTP request to ingest a song/playlist zip, or playlist manifest.
+	GraphQL API for songs, playlists.
+
+Queries:
+	Search that isn't awful. Bleve? When does indexing happen?
+	Song:
+#		Title, artist, meta, etc. 
+		Preview audio. (over network? how does beatdrop do it?)
+		Query info out of various mods.
+	Playlist:
+		song list
+		Download all songs
+	Downloads:
+		Pending downloads. Poll this for something resembling a download queue.
+		List song/playlist-manifest downloads.
+
+Mutations:
+	Take a song.zip download URL and fetch the song.
+	Take a playlist.json (or playlist.zip) download URL, and fetch the playlist (with songs?)
+
+
