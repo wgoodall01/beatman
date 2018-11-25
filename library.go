@@ -43,7 +43,7 @@ func (l *Library) Reload() (new int, err error) {
 	l.Lock()
 	defer l.Unlock()
 
-	log.WithFields(logrus.Fields{
+	log.lib.WithFields(logrus.Fields{
 		"path": l.Path,
 	}).Debug("Loading song library")
 	customSongs := filepath.Join(l.Path, "CustomSongs")
@@ -72,7 +72,7 @@ func (l *Library) Reload() (new int, err error) {
 			return 0, err
 		}
 
-		songLog := log.WithFields(logrus.Fields{
+		songLog := log.lib.WithFields(logrus.Fields{
 			"name":       loadSong.Name,
 			"subName":    loadSong.SubName,
 			"authorName": loadSong.AuthorName,
@@ -99,7 +99,7 @@ func (l *Library) Reload() (new int, err error) {
 	for id, keep := range touched {
 		if !keep {
 			oldSong := l.songs[id]
-			log.WithFields(logrus.Fields{
+			log.lib.WithFields(logrus.Fields{
 				"name":       oldSong.Name,
 				"subName":    oldSong.SubName,
 				"authorName": oldSong.AuthorName,
@@ -167,10 +167,10 @@ func (l *Library) StartSync() {
 		for _ = range l.ticker.C {
 			new, err := l.Reload()
 			if err != nil {
-				log.WithError(err).Fatal("Failed to reload library in sync")
+				log.lib.WithError(err).Fatal("Failed to reload library in sync")
 			}
 			if new != 0 {
-				log.WithFields(logrus.Fields{"count": new}).Info("Loaded new songs")
+				log.lib.WithFields(logrus.Fields{"count": new}).Info("Loaded new songs")
 			}
 		}
 	}()

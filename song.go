@@ -24,7 +24,7 @@ func ParseID(text string) (id SongID) {
 	getInt := func(s string) int {
 		i64, err := strconv.ParseInt(s, 10, 32)
 		if err != nil {
-			log.Fatal("couldn't parse valid ID--what? Please open an issue.")
+			log.lib.Fatal("couldn't parse valid ID--what? Please open an issue.")
 		}
 		return int(i64)
 	}
