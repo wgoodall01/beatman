@@ -26,6 +26,6 @@ func main() {
 
 	schema := graphql.MustParseSchema(SchemaText, &Resolver{library})
 	http.Handle("/graphql", &relay.Handler{Schema: schema})
-	log.Info("Loaded graphql")
+	log.Info("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
