@@ -1,14 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"net/http"
+
+	graphql "github.com/graph-gophers/graphql-go"
+	"github.com/graph-gophers/graphql-go/relay"
+)
 
 func main() {
-	songs, err := LoadCustomSongs("_beatsaber/CustomSongs")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		for _, song := range songs {
-			fmt.Println(song)
-		}
-	}
+	log.Println("Starting server")
+	schema := graphql.MustParseSchema(SchemaText, &Resolver{"_beatsaber"})
+	http.Handle("/graphql", &relay.Handler{Schema: schema})
+	log.Println("Loaded graphql")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

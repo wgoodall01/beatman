@@ -2,12 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	graphql "github.com/graph-gophers/graphql-go"
 )
 
 type Song struct {
@@ -24,25 +25,6 @@ type Song struct {
 	PreviewDuration  int     `json:"previewDuration"`
 
 	// Don't worry about the actual track data for now.
-}
-
-func openDir(path string) (dir *os.File, err error) {
-	// Open the directory
-	dir, err = os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-
-	// Fail if the file isn't a directory.
-	dirInfo, err := dir.Stat()
-	if err != nil {
-		return nil, err
-	}
-	if !dirInfo.IsDir() {
-		return nil, errors.New("openDir: not a directory")
-	}
-
-	return dir, err
 }
 
 var beatsaverIDRegex = regexp.MustCompile("[0-9]+-[0-9]+")
@@ -79,6 +61,11 @@ func LoadSong(path string) (song *Song, err error) {
 			id := filepath.Base(dir.Name())
 			if beatsaverIDRegex.MatchString(id) {
 				song.ID = id
+			} else {
+				// TODO: internal IDs for non-beatsaver songs
+				id := strings.Replace(song.Name, " ", "-", -1)
+				id = strings.ToLower(id)
+				song.ID = id
 			}
 		}
 	}
@@ -86,30 +73,35 @@ func LoadSong(path string) (song *Song, err error) {
 	return song, nil
 }
 
-func LoadCustomSongs(path string) (songs []*Song, err error) {
-	dir, err := openDir(path)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get the names of the song directories
-	filenames, err := dir.Readdirnames(0)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, filename := range filenames {
-		song, err := LoadSong(filepath.Join(path, filename))
-		if err != nil {
-			return nil, err
-		}
-
-		songs = append(songs, song)
-	}
-
-	return songs, err
-}
-
 func (s *Song) String() string {
 	return fmt.Sprintf("%s (%s) [by %s, %.1fbpm]", s.Name, s.SubName, s.AuthorName, s.BeatsPerMinute)
+}
+
+type SongResolver struct {
+	song *Song
+}
+
+func (sr SongResolver) Id() *graphql.ID {
+	if sr.song.ID == "" {
+		return nil
+	} else {
+		id := graphql.ID(sr.song.ID)
+		return &id
+	}
+}
+
+func (sr SongResolver) Name() string {
+	return sr.song.Name
+}
+
+func (sr SongResolver) SubName() *string {
+	return optStr(sr.song.SubName)
+}
+
+func (sr SongResolver) AuthorName() *string {
+	return optStr(sr.song.AuthorName)
+}
+
+func (sr SongResolver) BeatsPerMinute() *float64 {
+	return optFloat64(sr.song.BeatsPerMinute)
 }

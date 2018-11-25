@@ -6,7 +6,6 @@ Install modes:
 		Use inconshreveable/mousetrap to detect launches from Explorer (or maybe a different build?)
 		Open a webserver on localhost, open a web browser to that port.
 		No auth.
-
 	Live in a Docker container.
 		Mounts /beatsaber: Something approximating the BeatSaber install dir.
 		Opens a port, web UI. Auth with simple tokens, basic auth, or smth. 
