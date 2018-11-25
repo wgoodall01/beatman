@@ -13,10 +13,15 @@ require (
 	github.com/golang/protobuf v1.2.0 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/graph-gophers/graphql-go v0.0.0-20181116072428-fd99376b56e9
+	github.com/mattn/go-colorable v0.0.9 // indirect
+	github.com/mattn/go-isatty v0.0.4 // indirect
+	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/opentracing/opentracing-go v1.0.2 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
+	github.com/sirupsen/logrus v1.2.0
 	github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 // indirect
 	github.com/tinylib/msgp v1.0.2 // indirect
 	github.com/willf/bitset v1.1.9 // indirect
+	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a // indirect
 )

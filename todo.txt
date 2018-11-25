@@ -7,19 +7,19 @@ Install modes:
 		Open a webserver on localhost, open a web browser to that port.
 		No auth.
 	Live in a Docker container.
-		Mounts /beatsaber: Something approximating the BeatSaber install dir.
+#		Mounts /beatsaber: Something approximating the BeatSaber install dir.
 		Opens a port, web UI. Auth with simple tokens, basic auth, or smth. 
 
 
 Backend: 
-	Look at a beatsaber installs dir (basically, CustomSongs and Playlists)
+#	Look at a beatsaber installs dir (basically, CustomSongs and Playlists)
 	HTTP request for song audio. /api/audio/xxxxx-xxxxx -> <whatever path it actually is>
 	HTTP request for song cover. /api/cover/xxxxx-xxxxx -> <whatever the cover is>
 	HTTP request to ingest a song/playlist zip, or playlist manifest.
-	GraphQL API for songs, playlists.
+#	GraphQL API for songs, playlists.
 
 Queries:
-	Search that isn't awful. Bleve? When does indexing happen?
+#	Search that isn't awful. Bleve? When does indexing happen?
 	Song:
 #		Title, artist, meta, etc. 
 		Preview audio. (over network? how does beatdrop do it?)

@@ -6,14 +6,53 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	graphql "github.com/graph-gophers/graphql-go"
 )
 
+type SongID struct {
+	Name        string // From directory title
+	ID, Version int    // From beatsaver.com key, format
+}
+
+var beatsaverIDRegex = regexp.MustCompile(`[0-9]+-[0-9]+`)
+
+// ParseID takes text and turns it into a usable song ID
+func ParseID(text string) (id SongID) {
+	getInt := func(s string) int {
+		i64, err := strconv.ParseInt(s, 10, 32)
+		if err != nil {
+			log.Fatal("couldn't parse valid ID--what? Please open an issue.")
+		}
+		return int(i64)
+	}
+
+	if beatsaverIDRegex.MatchString(text) {
+		// Parse the bsaver id
+		split := strings.Split(text, "-")
+		id.ID = getInt(split[0])
+		id.Version = getInt(split[1])
+	} else {
+		// Use the dir name
+		id.Name = text
+	}
+
+	return id
+}
+
+func (sid *SongID) String() string {
+	if sid.Name != "" {
+		return sid.Name
+	} else {
+		return fmt.Sprintf("%d-%d", sid.ID, sid.Version)
+	}
+}
+
 type Song struct {
 	// Song metadata
-	ID         string // like "1183-814", from beatsaver, or "" if it can't be determined
+	ID         SongID
 	Name       string `json:"songName"`
 	SubName    string `json:"songSubName"`
 	AuthorName string `json:"authorName"`
@@ -26,8 +65,6 @@ type Song struct {
 
 	// Don't worry about the actual track data for now.
 }
-
-var beatsaverIDRegex = regexp.MustCompile("[0-9]+-[0-9]+")
 
 func LoadSong(path string) (song *Song, err error) {
 	song = &Song{}
@@ -58,15 +95,7 @@ func LoadSong(path string) (song *Song, err error) {
 
 			// set the song's ID based on the directory name
 			// note: sometimes this will break, f.ex if the folders are named after the song.
-			id := filepath.Base(dir.Name())
-			if beatsaverIDRegex.MatchString(id) {
-				song.ID = id
-			} else {
-				// TODO: internal IDs for non-beatsaver songs
-				id := strings.Replace(song.Name, " ", "-", -1)
-				id = strings.ToLower(id)
-				song.ID = id
-			}
+			song.ID = ParseID(filepath.Base(dir.Name()))
 		}
 	}
 
@@ -81,13 +110,8 @@ type SongResolver struct {
 	song *Song
 }
 
-func (sr SongResolver) Id() *graphql.ID {
-	if sr.song.ID == "" {
-		return nil
-	} else {
-		id := graphql.ID(sr.song.ID)
-		return &id
-	}
+func (sr SongResolver) Id() graphql.ID {
+	return graphql.ID(sr.song.ID.String())
 }
 
 func (sr SongResolver) Name() string {
