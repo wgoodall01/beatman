@@ -13,6 +13,7 @@ Install modes:
 
 Backend: 
 #	Look at a beatsaber installs dir (basically, CustomSongs and Playlists)
+	Load song zip files (currently only extracted dirs work)
 	HTTP request for song audio. /api/audio/xxxxx-xxxxx -> <whatever path it actually is>
 	HTTP request for song cover. /api/cover/xxxxx-xxxxx -> <whatever the cover is>
 	HTTP request to ingest a song/playlist zip, or playlist manifest.

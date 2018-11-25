@@ -65,9 +65,19 @@ func (l *Library) Reload() (new int, err error) {
 		touched[id] = false
 	}
 
+FileLoop:
 	for _, filename := range filenames {
 		songPath := filepath.Join(customSongs, filename)
+		if strings.HasPrefix(filename, ".") {
+			log.lib.WithField("path", songPath).Warn("ignored dotfile")
+			continue FileLoop
+		}
+
 		loadSong, err := LoadSong(songPath)
+		if err == nil && loadSong == nil {
+			log.lib.WithField("path", songPath).Warn("ignored song")
+			continue FileLoop
+		}
 		if err != nil {
 			return 0, err
 		}
@@ -85,13 +95,12 @@ func (l *Library) Reload() (new int, err error) {
 		existingSong := l.songs[loadSong.ID]
 		if existingSong == nil {
 			// this is a new song, add it
-			songLog.Info("Discovered song")
+			songLog.Info("discovered song")
 			new++
 
 			l.songs[loadSong.ID] = loadSong
 		} else {
 			// Update existing song
-			songLog.Debug("Updated song")
 			*existingSong = *loadSong
 		}
 	}
@@ -159,9 +168,9 @@ FilterLoop:
 	return songs
 }
 
-// StartSync begins to reload the Library from disk once every 10s
-func (l *Library) StartSync() {
-	l.ticker = time.NewTicker(time.Second * 10)
+// StartSync begins to reload the Library from disk once every freq.
+func (l *Library) StartSync(freq time.Duration) {
+	l.ticker = time.NewTicker(freq)
 
 	go func() {
 		for _ = range l.ticker.C {

@@ -13,11 +13,13 @@ import (
 
 func main() {
 	// Set up beatsaber library
+	startLoad := time.Now()
 	library, err := NewLibrary("_beatsaber")
 	if err != nil {
 		log.lib.WithError(err).Fatal("Could not open library")
 	}
-	library.StartSync()
+	library.StartSync(time.Second * 30)
+	log.lib.WithField("in", time.Since(startLoad)).Info("done loading library")
 
 	// Set up mux
 	r := mux.NewRouter()
@@ -30,7 +32,7 @@ func main() {
 				"method": r.Method,
 				"uri":    r.RequestURI,
 				"time":   time.Since(start),
-			}).Info()
+			}).Info("req")
 		})
 	})
 
@@ -45,6 +47,6 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 		Handler:      r,
 	}
-	log.web.Info("Listening on :8080")
+	log.web.Info("listening on :8080")
 	log.web.Fatal(srv.ListenAndServe())
 }

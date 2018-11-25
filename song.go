@@ -66,36 +66,58 @@ type Song struct {
 	// Don't worry about the actual track data for now.
 }
 
+// LoadSong attempts to load the given path as a song.
+// If it succeeds, it returns the song and err=nil
+// If it doesn't know how to load that path, it returns song=nil, err=nil
+// If it fails somehow, it returns song=nil, err=why
 func LoadSong(path string) (song *Song, err error) {
 	song = &Song{}
 
-	dir, err := openDir(path)
+	// Open the song file
+	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get the directory contents
-	filenames, err := dir.Readdirnames(0)
+	// Get file info--dir? zip?
+	fileInfo, err := file.Stat()
 	if err != nil {
 		return nil, err
 	}
 
-	// Look through files for info.json
-	for _, filename := range filenames {
-		if strings.ToLower(filename) == "info.json" {
-			infoPath := filepath.Join(dir.Name(), filename)
-			infoFile, err := os.Open(infoPath)
+	if !fileInfo.IsDir() {
+		// Load from zip file
+		return nil, nil // can't do this yet
+	} else {
+		// Load from directory
+
+		// Look through files for info.json
+		err = filepath.Walk(path, func(infoPath string, info os.FileInfo, err error) error {
 			if err != nil {
-				return nil, err
+				return err
 			}
 
-			// parse the info.json into the Song
-			decoder := json.NewDecoder(infoFile)
-			decoder.Decode(song)
+			basename := filepath.Base(infoPath)
 
-			// set the song's ID based on the directory name
-			// note: sometimes this will break, f.ex if the folders are named after the song.
-			song.ID = ParseID(filepath.Base(dir.Name()))
+			if strings.ToLower(basename) == "info.json" {
+				infoFile, err := os.Open(infoPath)
+				if err != nil {
+					return err
+				}
+
+				// parse the info.json into the Song
+				decoder := json.NewDecoder(infoFile)
+				decoder.Decode(song)
+
+				// set the song's ID based on the directory name
+				// note: sometimes this will break, f.ex if the folders are named after the song.
+				song.ID = ParseID(filepath.Base(file.Name()))
+			}
+
+			return nil
+		})
+		if err != nil {
+			return nil, err
 		}
 	}
 
