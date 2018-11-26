@@ -12,6 +12,10 @@
   box-sizing: inherit;
 }
 
+html {
+  padding-left: calc(100vw - 100%); /* disables scrollbar page shift */
+}
+
 body {
   margin: 0;
   padding: 0;

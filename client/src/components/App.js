@@ -32,11 +32,10 @@ const App = () => (
                   query {
                     songs {
                       id
-                      name
-                      subName
-                      authorName
+                      ...Song
                     }
                   }
+                  ${Song.fragment}
                 `}
               >
                 {({loading, error, data}) => {

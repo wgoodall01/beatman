@@ -29,19 +29,12 @@ func NewLibrary(path string) (library *Library, err error) {
 		Path:  path,
 	}
 
-	// Load the songs in from disk
-	_, err = library.Reload()
-	if err != nil {
-		return nil, err
-	}
-
 	return library, nil
 }
 
-// Reload the library contents from disk
-func (l *Library) Reload() (new int, err error) {
-	l.Lock()
-	defer l.Unlock()
+// Load the library contents from disk, updating existing songs.
+func (l *Library) Load() (new int, err error) {
+	// using local locking so we don't block the Library for 20s
 
 	log.lib.WithFields(logrus.Fields{
 		"path": l.Path,
@@ -92,6 +85,7 @@ FileLoop:
 
 		touched[loadSong.ID] = true
 
+		l.Lock()
 		existingSong := l.songs[loadSong.ID]
 		if existingSong == nil {
 			// this is a new song, add it
@@ -103,10 +97,12 @@ FileLoop:
 			// Update existing song
 			*existingSong = *loadSong
 		}
+		l.Unlock()
 	}
 
 	for id, keep := range touched {
 		if !keep {
+			l.Lock()
 			oldSong := l.songs[id]
 			log.lib.WithFields(logrus.Fields{
 				"name":       oldSong.Name,
@@ -115,6 +111,7 @@ FileLoop:
 				"id":         oldSong.ID.String(),
 			}).Info("Forgot song")
 			delete(l.songs, id)
+			l.Unlock()
 		}
 	}
 
@@ -173,13 +170,19 @@ func (l *Library) StartSync(freq time.Duration) {
 	l.ticker = time.NewTicker(freq)
 
 	go func() {
+		// run initial sync
+		_, err := l.Load()
+		if err != nil {
+			log.lib.WithError(err).Fatal("failed to reload library in sync")
+		}
+
 		for _ = range l.ticker.C {
-			new, err := l.Reload()
+			new, err := l.Load()
 			if err != nil {
-				log.lib.WithError(err).Fatal("Failed to reload library in sync")
+				log.lib.WithError(err).Fatal("failed to reload library in sync")
 			}
 			if new != 0 {
-				log.lib.WithFields(logrus.Fields{"count": new}).Info("Loaded new songs")
+				log.lib.WithFields(logrus.Fields{"count": new}).Info("loaded new songs")
 			}
 		}
 	}()
