@@ -13,6 +13,7 @@ var baseLog = logrus.New()
 type logPrefixes struct {
 	web *logrus.Entry
 	lib *logrus.Entry
+	cli *logrus.Entry
 }
 
 var log logPrefixes
@@ -25,6 +26,7 @@ func init() {
 	log = logPrefixes{
 		web: baseLog.WithField("prefix", "web"),
 		lib: baseLog.WithField("prefix", "lib"),
+		cli: baseLog.WithField("prefix", "cli"),
 	}
 
 }

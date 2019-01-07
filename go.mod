@@ -22,6 +22,7 @@ require (
 	github.com/sirupsen/logrus v1.2.0
 	github.com/steveyen/gtreap v0.0.0-20150807155958-0abe01ef9be2 // indirect
 	github.com/tinylib/msgp v1.0.2 // indirect
+	github.com/urfave/cli v1.20.0
 	github.com/willf/bitset v1.1.9 // indirect
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a // indirect
